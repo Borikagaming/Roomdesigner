@@ -1,0 +1,7 @@
+{
+  "devDependencies": {
+    "@angular/ssr": "^21.2.0",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.3.3"
+  }
+}
