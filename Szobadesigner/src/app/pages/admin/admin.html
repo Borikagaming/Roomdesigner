@@ -1,0 +1,175 @@
+<section class="admin-shell page-shell">
+  <div class="page-card admin-card">
+    <div class="admin-header">
+      <div>
+        <p class="section-eyebrow">Admin felület</p>
+        <h2 class="section-title section-title--medium">Felhasználók, tiltások és fellebbezések kezelése</h2>
+        <p class="section-copy">
+          Itt láthatók az aktív felhasználók, a mentett szobáik, a bannolt email címek, valamint a hozzájuk érkezett
+          fellebbezések is.
+        </p>
+      </div>
+      <button type="button" class="secondary-button" (click)="loadUsers()" [disabled]="isLoading">Frissítés</button>
+    </div>
+
+    @if (errorMessage) {
+      <div class="message-banner message-banner--error">{{ errorMessage }}</div>
+    }
+
+    @if (successMessage) {
+      <div class="message-banner message-banner--success">{{ successMessage }}</div>
+    }
+
+    @if (isLoading) {
+      <div class="admin-empty">Az admin adatok betöltése folyamatban...</div>
+    } @else {
+      <section class="admin-block">
+        <div class="admin-block__header">
+          <div>
+            <h3>Aktív felhasználók</h3>
+            <p>Innen továbbra is betöltheted a szobaterveket, vagy szükség esetén bannolhatod a felhasználót.</p>
+          </div>
+          <span class="admin-counter">{{ users.length }} felhasználó</span>
+        </div>
+
+        @if (!users.length) {
+          <div class="admin-empty">Jelenleg nincs megjeleníthető aktív felhasználó.</div>
+        } @else {
+          <div class="admin-user-list">
+            @for (user of users; track user.id) {
+              <article class="admin-user-card">
+                <div class="admin-user-top">
+                  <div class="admin-user-main">
+                    <img [src]="user.profile_image || '/default-avatar.png'" [alt]="user.name" class="admin-avatar">
+                    <div class="admin-user-copy">
+                      <div class="admin-user-name-row">
+                        <strong>{{ user.name }}</strong>
+                        @if (user.is_admin) {
+                          <span class="admin-badge">Admin</span>
+                        }
+                      </div>
+                      <span>{{ user.email }}</span>
+                    </div>
+                  </div>
+                  <div class="admin-user-meta">
+                    <span>{{ user.room_count }} mentett szoba</span>
+                  </div>
+                </div>
+
+                <section class="admin-user-section">
+                  <h3 class="mentettsz">Mentett szobák</h3>
+
+                  @if (!user.rooms.length) {
+                    <div class="admin-room-empty">A felhasználónak jelenleg nincs mentett szobája.</div>
+                  } @else {
+                    <div class="admin-room-list">
+                      @for (room of user.rooms; track room.id) {
+                        <div class="admin-room-item">
+                          <div class="admin-room-copy">
+                            <strong>{{ room.name }}</strong>
+                            <span>{{ formatDate(room.updated_at || room.created_at) }}</span>
+                          </div>
+                          <button
+                            type="button"
+                            class="primary-button admin-room-button"
+                            (click)="loadRoomInDesigner(user, room)"
+                            [disabled]="activeRoomKey === user.id + ':' + room.id">
+                            {{ activeRoomKey === user.id + ':' + room.id ? 'Betöltés...' : 'Betöltés a designerbe' }}
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  }
+                </section>
+
+                @if (!user.is_admin) {
+                  <section class="admin-user-section admin-user-section--danger">
+                    <h3 class="ban">Felhasználó bannolása</h3>
+                    <label class="field-shell">
+                      <span>Ban indoka</span>
+                      <textarea
+                        [(ngModel)]="banReasons[user.id]"
+                        rows="3"
+                        placeholder="Írd be, miért bannolod ezt az email címet."></textarea>
+                    </label>
+                    <button
+                      type="button"
+                      class="danger-button"
+                      (click)="banUser(user)"
+                      [disabled]="banningUserId === user.id">
+                      {{ banningUserId === user.id ? 'Bannolás...' : 'Felhasználó bannolása és törlése' }}
+                    </button>
+                  </section>
+                }
+              </article>
+            }
+          </div>
+        }
+      </section>
+
+      <section class="admin-block">
+        <div class="admin-block__header">
+          <div>
+            <h3>Bannolt email címek</h3>
+            <p>Itt jelennek meg a tiltások, az indokok és a beküldött fellebbezések. Innen tudod feloldani a tiltást és visszaállítani a felhasználót.</p>
+          </div>
+          <span class="admin-counter">{{ bannedEmails.length }} tiltás</span>
+        </div>
+
+        @if (!bannedEmails.length) {
+          <div class="admin-empty">Jelenleg nincs aktív tiltás.</div>
+        } @else {
+          <div class="admin-ban-list">
+            @for (bannedEmail of bannedEmails; track bannedEmail.id) {
+              <article class="admin-ban-card">
+                <div class="admin-ban-top">
+                  <div class="admin-ban-copy">
+                    <strong>{{ bannedEmail.email }}</strong>
+                    <span>Bannolva: {{ formatDate(bannedEmail.created_at) }}</span>
+                    @if (bannedEmail.banned_by_name) {
+                      <span>Admin: {{ bannedEmail.banned_by_name }}</span>
+                    }
+                  </div>
+
+                  <button
+                    type="button"
+                    class="secondary-button admin-unban-button"
+                    (click)="unbanUser(bannedEmail)"
+                    [disabled]="unbanningBanId === bannedEmail.id">
+                    {{ unbanningBanId === bannedEmail.id ? 'Visszaállítás...' : 'Tiltás feloldása és user visszaállítása' }}
+                  </button>
+                </div>
+
+                <div class="admin-ban-panels">
+                  <section class="admin-ban-panel">
+                    <h4>Ban indoka</h4>
+                    <p>{{ bannedEmail.reason }}</p>
+                  </section>
+
+                  <section class="admin-ban-panel">
+                    <h4>Fellebbezés</h4>
+                    @if (bannedEmail.appeal_message) {
+                      <p>{{ bannedEmail.appeal_message }}</p>
+                      <span>{{ formatDate(bannedEmail.appeal_submitted_at) }}</span>
+                    } @else {
+                      <p>Még nem érkezett fellebbezés ehhez a tiltáshoz.</p>
+                    }
+                  </section>
+
+                  <section class="admin-ban-panel">
+                    <h4>Visszaállítási állapot</h4>
+                    @if (bannedEmail.can_restore_user === false) {
+                      <p>Ehhez a régebbi tiltáshoz nem tartozik teljes visszaállítási adat, ezért előbb backend migráció és újrabannolás szükséges.</p>
+                    } @else {
+                      <p>A felhasználó az eredeti emaillel és jelszóval visszaállítható a users táblába.</p>
+                    }
+                  </section>
+                </div>
+              </article>
+            }
+          </div>
+        }
+      </section>
+    }
+  </div>
+</section>

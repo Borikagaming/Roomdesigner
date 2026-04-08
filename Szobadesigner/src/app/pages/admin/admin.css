@@ -1,0 +1,263 @@
+:host {
+  display: block;
+}
+
+h2 {
+  color: rgba(239, 246, 252, 0.93);
+}
+
+.mentettsz {
+  color: #8fda8f;
+}
+
+.ban {
+  color: #ff9c9c;
+}
+
+.admin-shell {
+  padding: 28px 20px 48px;
+}
+
+.admin-card {
+  display: grid;
+  gap: 20px;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.admin-block {
+  display: grid;
+  gap: 18px;
+}
+
+.admin-block__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.admin-block__header h3 {
+  margin: 0 0 6px;
+  color: var(--app-text);
+}
+
+.admin-block__header p {
+  margin: 0;
+  color: var(--app-muted);
+  line-height: 1.55;
+  max-width: 72ch;
+}
+
+.admin-counter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 96px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(111, 211, 255, 0.14);
+  border: 1px solid rgba(111, 211, 255, 0.18);
+  color: var(--app-accent);
+  font-weight: 700;
+}
+
+.admin-user-list,
+.admin-ban-list {
+  display: grid;
+  gap: 18px;
+}
+
+.admin-user-card,
+.admin-ban-card {
+  display: grid;
+  gap: 18px;
+  padding: 20px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.admin-user-top,
+.admin-ban-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.admin-user-main {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.admin-avatar {
+  width: 76px;
+  height: 76px;
+  border-radius: 22px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.admin-user-copy,
+.admin-ban-copy {
+  display: grid;
+  gap: 4px;
+  color: var(--app-muted);
+}
+
+.admin-user-copy strong,
+.admin-ban-copy strong {
+  color: var(--app-text);
+  font-size: 1.08rem;
+}
+
+.admin-user-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(111, 211, 255, 0.18);
+  color: var(--app-accent);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.admin-user-meta {
+  color: var(--app-accent);
+  font-weight: 700;
+  text-align: right;
+}
+
+.admin-user-section {
+  display: grid;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.admin-user-section h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.admin-user-section--danger {
+  background: rgba(255, 141, 141, 0.05);
+  border-radius: 20px;
+  padding: 16px;
+  border-top: 0;
+  border: 1px solid rgba(255, 141, 141, 0.18);
+}
+
+.admin-room-list {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-room-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-room-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.admin-room-copy strong {
+  color: var(--app-text);
+}
+
+.admin-room-copy span,
+.admin-room-empty,
+.admin-empty {
+  color: var(--app-muted);
+}
+
+.admin-room-button {
+  min-width: 180px;
+}
+
+.admin-ban-panels {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.admin-ban-panel {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-ban-panel h4 {
+  margin: 0;
+  color: var(--app-text);
+  font-size: 0.95rem;
+}
+
+.admin-ban-panel p,
+.admin-ban-panel span {
+  margin: 0;
+  color: var(--app-muted);
+  line-height: 1.55;
+}
+
+.admin-unban-button {
+  white-space: nowrap;
+}
+
+.field-shell textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+@media (max-width: 860px) {
+  .admin-header,
+  .admin-block__header,
+  .admin-user-top,
+  .admin-room-item,
+  .admin-ban-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-ban-panels {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-user-main {
+    align-items: flex-start;
+  }
+
+  .admin-user-meta {
+    text-align: left;
+  }
+
+  .admin-room-button,
+  .admin-unban-button {
+    width: 100%;
+  }
+}

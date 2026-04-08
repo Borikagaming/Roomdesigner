@@ -1,0 +1,96 @@
+<section class="auth-shell page-shell">
+  <div class="auth-card page-card page-card--compact">
+    <p class="section-eyebrow">Üdv újra</p>
+    <h2 class="section-title section-title--medium">Bejelentkezés</h2>
+    <p class="section-copy">Lépj be, hogy elérd a mentett szobáidat és folytathasd a tervezést.</p>
+
+    <form class="auth-form" (ngSubmit)="onLogin()">
+      <div class="field-shell">
+        <label for="login-identifier">E-mail</label>
+        <input
+          id="login-identifier"
+          type="text"
+          [(ngModel)]="loginData.identifier"
+          name="identifier"
+          placeholder="pelda@email.hu"
+          required>
+      </div>
+
+      <div class="field-shell">
+        <label for="login-password">Jelszó</label>
+        <input
+          id="login-password"
+          type="password"
+          [(ngModel)]="loginData.password"
+          name="password"
+          placeholder="Add meg a jelszavad"
+          required>
+      </div>
+
+      @if (loginError) {
+        <div class="message-banner message-banner--error">{{ loginError }}</div>
+      }
+
+      @if (showAppealForm) {
+        <section class="appeal-panel">
+          <div class="appeal-panel__copy">
+            <strong>Fellebbezés küldése</strong>
+            <p>Ha szerinted a tiltás tévedés vagy szeretnéd kérni a felülvizsgálatát, itt üzenetet küldhetsz az adminnak, aki 48 órán belül felűlvizsgálja a fellebezésed.</p>
+
+            @if (appealReason) {
+              <p class="appeal-panel__reason"><strong>Ban indoka:</strong> {{ appealReason }}</p>
+            }
+          </div>
+
+          <div class="field-shell">
+            <label for="appeal-email">Érintett e-mail cím</label>
+            <input
+              id="appeal-email"
+              type="email"
+              [(ngModel)]="appealEmail"
+              [ngModelOptions]="{ standalone: true }"
+              name="appealEmail"
+              placeholder="pelda@email.hu">
+          </div>
+
+          <div class="field-shell">
+            <label for="appeal-message">Fellebbezés indoklása</label>
+            <textarea
+              id="appeal-message"
+              [(ngModel)]="appealMessage"
+              [ngModelOptions]="{ standalone: true }"
+              name="appealMessage"
+              rows="4"
+              placeholder="Írd le röviden, miért szeretnéd a tiltás felülvizsgálatát."></textarea>
+          </div>
+
+          @if (appealError) {
+            <div class="message-banner message-banner--error">{{ appealError }}</div>
+          }
+
+          @if (appealSuccess) {
+            <div class="message-banner message-banner--success">{{ appealSuccess }}</div>
+          }
+
+          <button
+            type="button"
+            class="secondary-button auth-submit"
+            (click)="submitAppeal()"
+            [disabled]="isSubmittingAppeal">
+            {{ isSubmittingAppeal ? 'Fellebbezés küldése...' : 'Fellebbezés elküldése' }}
+          </button>
+        </section>
+      }
+
+      <label class="consent-row" for="gdpr">
+        <div>
+          <span class="adatkez">Adatkezelési hozzájárulás</span>
+          <small>Elfogadom az <a href="/gdpr" target="_blank" rel="noopener noreferrer">adatvédelmi tájékoztatót</a>.</small>
+        </div>
+        <input type="checkbox" id="gdpr" name="gdpr" [(ngModel)]="gdprAccepted" required>
+      </label>
+
+      <button type="submit" class="primary-button auth-submit" [disabled]="!gdprAccepted">Belépés</button>
+    </form>
+  </div>
+</section>

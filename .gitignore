@@ -1,0 +1,6 @@
+.git-backups/
+Szobadesigner/.angular/
+Szobadesigner/node_modules/
+szobadesigner-backend/node_modules/
+szobadesigner-backend/vendor/
+szobadesigner-backend/.env

@@ -1,0 +1,57 @@
+﻿<section class="auth-shell page-shell">
+  <div class="auth-card page-card page-card--compact">
+    <p class="section-eyebrow">Kezdjük el</p>
+    <h2 class="section-title section-title--medium">Regisztráció</h2>
+    <p class="section-copy">Hozz létre fiókot, hogy elmentsd a terveidet és később is visszatérhess hozzájuk.</p>
+
+    <form class="auth-form" (ngSubmit)="onRegister()">
+      <div class="field-shell">
+        <label for="register-name">Felhasználónév</label>
+        <input id="register-name" type="text" [(ngModel)]="user.username" name="username" placeholder="Milyen néven jelenj meg?" required>
+      </div>
+
+      <div class="field-shell">
+        <label for="register-email">E-mail</label>
+        <input id="register-email" type="email" [(ngModel)]="user.email" name="email" placeholder="pelda@email.hu" required>
+      </div>
+
+      <div class="field-shell">
+        <label for="register-password">Jelszó</label>
+        <input id="register-password" type="password" [(ngModel)]="user.password" name="password" placeholder="Adj meg egy erős jelszót" required>
+      </div>
+
+      <div class="field-shell">
+        <label for="register-password-confirm">Jelszó megerősítése</label>
+        <input id="register-password-confirm" type="password" [(ngModel)]="passwordConfirm" name="passwordConfirm" placeholder="Írd be újra a jelszót" required>
+      </div>
+
+      <p class="auth-note">{{ passwordPolicyHint }}</p>
+
+      <label class="consent-row" for="register-gdpr">
+        <div>
+          <span class="adatkez">Adatkezelési tájékoztató</span>
+          <small>Elolvastam és elfogadom az <a href="/gdpr" target="_blank" rel="noopener noreferrer">adatkezelési tájékoztatót</a>.</small>
+        </div>
+        <input type="checkbox" id="register-gdpr" name="acceptedGdpr" [(ngModel)]="gdprAccepted" required>
+      </label>
+
+      <label class="consent-row" for="register-terms">
+        <div class="adatkez">
+          <span>Általános Szerződési Feltételek</span>
+          <small>Elolvastam és elfogadom az <a href="/aszf" target="_blank" rel="noopener noreferrer">ÁSZF-et</a>.</small>
+        </div>
+        <input type="checkbox" id="register-terms" name="acceptedTerms" [(ngModel)]="termsAccepted" required>
+      </label>
+
+      @if (registerError) {
+        <div class="message-banner message-banner--error">{{ registerError }}</div>
+      }
+
+      @if (registerSuccess) {
+        <div class="message-banner message-banner--success">{{ registerSuccess }}</div>
+      }
+
+      <button type="submit" class="primary-button auth-submit" [disabled]="!gdprAccepted || !termsAccepted">Küldés</button>
+    </form>
+  </div>
+</section>

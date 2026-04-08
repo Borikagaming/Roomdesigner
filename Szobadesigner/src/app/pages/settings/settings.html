@@ -1,0 +1,100 @@
+﻿<section class="settings-shell page-shell">
+  <div class="settings-card page-card">
+    <div class="settings-header">
+      <div>
+        <p class="section-eyebrow">Fiókkezelés</p>
+        <h2 class="section-title section-title--medium">Fiók beállítások</h2>
+        <p class="section-copy">Itt módosíthatod a profilképedet, elérhetőségeidet és a belépési adataidat.</p>
+      </div>
+      <div class="settings-badge"><i class="bi bi-person-vcard-fill"></i> Személyes profil</div>
+    </div>
+
+    <div class="profile-pic-section">
+      <img [src]="userData.profile_image || 'default-avatar.png'" class="preview-img" alt="Profilkép előnézet" />
+
+      <div class="profile-actions">
+        <label class="secondary-button upload-btn">
+          <i class="bi bi-camera"></i> Profilkép módosítása
+          <input type="file" (change)="onFileSelected($event)" hidden accept="image/*" />
+        </label>
+
+        <button type="button" class="danger-button" (click)="deleteProfileImage()">
+          <i class="bi bi-trash"></i> Kép törlése
+        </button>
+      </div>
+    </div>
+
+    <div class="settings-grid">
+      <div class="field-shell">
+        <label for="settings-name">Felhasználónév</label>
+        <input id="settings-name" type="text" [(ngModel)]="userData.name" placeholder="Új név" />
+      </div>
+
+      <div class="field-shell">
+        <label for="settings-email">E-mail cím</label>
+        <input id="settings-email" type="email" [(ngModel)]="userData.email" placeholder="Új email" />
+      </div>
+    </div>
+
+    <div class="password-section">
+      <button type="button" class="secondary-button password-toggle" (click)="togglePasswordFields()">
+        <i class="bi" [class.bi-shield-lock]="!showPasswordFields" [class.bi-x-circle]="showPasswordFields"></i>
+        {{ showPasswordFields ? 'Jelszóváltoztatás bezárása' : 'Jelszó változtatása' }}
+      </button>
+
+      @if (showPasswordFields) {
+        <div class="password-panel">
+          <div class="password-panel__header">
+            <p class="section-eyebrow">Biztonság</p>
+            <h3>Jelszó módosítása</h3>
+            <p>Add meg a jelenlegi jelszavadat, majd írd be kétszer az újat.</p>
+          </div>
+
+          <div class="settings-grid password-grid">
+            <div class="field-shell">
+              <label for="settings-current-password">Jelenlegi jelszó</label>
+              <input
+                id="settings-current-password"
+                type="password"
+                [(ngModel)]="userData.current_password"
+                placeholder="A mostani jelszavad" />
+            </div>
+
+            <div class="field-shell">
+              <label for="settings-password">Új jelszó</label>
+              <input
+                id="settings-password"
+                type="password"
+                [(ngModel)]="userData.new_password"
+                placeholder="Új jelszó" />
+            </div>
+
+            <div class="field-shell">
+              <label for="settings-password-confirm">Új jelszó megerősítése</label>
+              <input
+                id="settings-password-confirm"
+                type="password"
+                [(ngModel)]="userData.new_password_confirm"
+                placeholder="Új jelszó ismét" />
+            </div>
+          </div>
+
+          <p class="settings-note">
+            A jelszóváltás csak akkor történik meg, ha itt megadod a jelenlegi jelszót és kétszer az új jelszót is.
+          </p>
+
+          <p class="settings-note settings-note--secondary">{{ passwordPolicyHint }}</p>
+        </div>
+      }
+    </div>
+
+    @if (settingsError) {
+      <div class="message-banner message-banner--error">{{ settingsError }}</div>
+    }
+
+    <div class="settings-actions">
+      <button type="button" class="primary-button settings-save" (click)="saveSettings()"><i class="bi bi-floppy2-fill"></i> Módosítások mentése</button>
+      <button type="button" class="danger-button settings-delete" (click)="deleteProfile()"><i class="bi bi-trash"></i> Profil törlése</button>
+    </div>
+  </div>
+</section>

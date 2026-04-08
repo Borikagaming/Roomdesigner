@@ -1,0 +1,425 @@
+﻿<div class="designer-wrapper">
+  <aside class="sidebar">
+    <div class="sidebar-scroll" #sidebarScroll [class.sidebar-scroll--locked]="isEditingWalls">
+      <div class="sidebar-header">
+        <p class="sidebar-eyebrow">Studio</p>
+        <h2>Room Designer</h2>
+        <p class="hint">Húzd be a kívánt bútorokat a szobába, majd alakítsd addig, amíg minden a helyére nem kerül.</p>
+      </div>
+
+      <section class="sidebar-section">
+        <div class="section-label"><i class="bi bi-door-open-fill"></i> Nyílászárók</div>
+        <h4 class="category-title">Ajtók és ablakok</h4>
+        <div class="furniture-group">
+          @for (item of doorWindowItems; track item.name) {
+            <div draggable="true" (dragstart)="onDragStart($event, item)" class="furniture-btn">
+              <img [src]="item.image" [alt]="item.label" class="furniture-icon" loading="lazy" decoding="async" />
+              <span>{{ item.label }}</span>
+            </div>
+          }
+        </div>
+      </section>
+
+      <section class="sidebar-section">
+        <div class="section-label"><i class="bi bi-lamp-fill"></i> Bútorok</div>
+        <div class="furniture-categories">
+          @for (cat of categories; track cat) {
+            <div class="furniture-category">
+              <h4 class="category-title category-chip">
+                <i [class]="getSidebarCategoryIcon(cat)"></i>
+                <span>{{ cat }}</span>
+              </h4>
+              <div class="furniture-group">
+                @for (item of getFurnitureByCategory(cat); track item.name) {
+                  <div draggable="true" (dragstart)="onDragStart($event, item)" class="furniture-btn">
+                    <img [src]="item.image" [alt]="item.label" class="furniture-icon" loading="lazy" decoding="async" />
+                    <span>{{ item.label }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <section class="sidebar-section">
+        <div class="section-label"><i class="bi bi-grid-1x2-fill"></i> Felületek</div>
+        <h4 class="category-title category-chip">
+          <i [class]="getSidebarCategoryIcon('Szőnyegek')"></i>
+          <span>Szőnyegek</span>
+        </h4>
+        <div class="furniture-group">
+          @for (rug of rugTypes; track rug.name) {
+            <div draggable="true" (dragstart)="onRugDragStart($event, rug)" class="furniture-btn">
+              <img [src]="rug.image" [alt]="rug.name" class="furniture-icon" loading="lazy" decoding="async" />
+              <span>{{ rug.name }}</span>
+            </div>
+          }
+        </div>
+
+        <h4 class="category-title category-chip category-title--spaced">
+          <i [class]="getSidebarCategoryIcon('Padlók')"></i>
+          <span>Padlók</span>
+        </h4>
+        <div class="furniture-group">
+          @for (floor of floorTypes; track floor.name) {
+            <div (click)="selectFloor(floor)" class="furniture-btn" [class.selected]="selectedFloor === floor">
+              <img [src]="floor.image" [alt]="floor.name" class="floor-icon" loading="lazy" decoding="async" />
+              <span>{{ floor.name }}</span>
+            </div>
+          }
+        </div>
+      </section>
+
+      <section
+        class="edit-panel edit-panel--room"
+        #wallEditPanel
+        [class.edit-panel--sticky]="isEditingWalls">
+        <div class="section-label"><i class="bi bi-rulers"></i> Szoba</div>
+        <h3>Szoba falak</h3>
+        <button type="button" class="btn-toggle" [class.active]="isEditingWalls" (click)="toggleWallEdit()">
+          <i class="bi bi-pencil-square"></i>{{ isEditingWalls ? 'Falak rögzítése' : 'Falak formázása' }}
+        </button>
+        <p *ngIf="isEditingWalls" class="wall-edit-warning">
+          Falak formázása módban nem lehet bútorokat vagy szőnyegeket behúzni a szobába. Rögzítsd a falakat a folytatáshoz.
+        </p>
+      </section>
+
+      @if (selectedObject && selectedObject !== roomPolygon) {
+        <section class="edit-panel edit-panel--object">
+          <div class="section-label"><i class="bi bi-sliders"></i> Szerkesztés</div>
+          <h3>Elem szerkesztés</h3>
+
+          @if (isDoorOrWindow()) {
+            <label class="edit-label">Szélesség</label>
+            <input type="number" [ngModel]="getObjectWidth()" (ngModelChange)="setObjectWidth($event)" />
+          }
+          @else {
+            <label class="edit-label">Szélesség</label>
+            <input type="number" [ngModel]="getObjectWidth()" (ngModelChange)="setObjectWidth($event)" />
+
+            <label class="edit-label">Magasság</label>
+            <input type="number" [ngModel]="getObjectHeight()" (ngModelChange)="setObjectHeight($event)" />
+
+            <label class="edit-label">Forgatás</label>
+            <input type="number" [ngModel]="getObjectRotation()" (ngModelChange)="setObjectRotation($event)" />
+          }
+          <button type="button" class="btn-delete" (click)="deleteSelected()"><i class="bi bi-trash"></i> Törlés</button>
+        </section>
+      }
+    </div>
+
+    <div class="stats-panel">
+      @if (statusMessage) {
+        <div
+          class="designer-status"
+          [class.designer-status--success]="statusTone === 'success'"
+          [class.designer-status--error]="statusTone === 'error'"
+          [class.designer-status--info]="statusTone === 'info'">
+          <span>{{ statusMessage }}</span>
+          <button type="button" class="designer-status__close" (click)="clearStatus()" aria-label="Üzenet bezárása">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+      }
+
+      <div class="stats-summary">
+        <span class="stats-summary__label">Terület</span>
+        <strong>{{ roomArea | number: '1.1-1' }} m²</strong>
+      </div>
+
+      <div class="stats-actions">
+        <button type="button" class="btn-save btn-save--primary" (click)="saveRoom()"><i class="bi bi-floppy2-fill"></i> Mentés</button>
+        <button type="button" class="btn-save btn-save--ghost" (click)="openSavedRoomsDialog()"><i class="bi bi-collection-fill"></i> Mentett szobák</button>
+        <button type="button" class="btn-save btn-save--ghost" (click)="importRoom()"><i class="bi bi-box-arrow-in-down"></i> Importálás</button>
+        <button type="button" class="btn-save btn-save--ghost" (click)="saveAsPng()"><i class="bi bi-image"></i> PNG mentés</button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="canvas-area" #canvasContainer
+        (drop)="onDrop($event)" 
+        (dragover)="onDragOver($event)">
+    <canvas id="roomCanvas"></canvas>
+    <input
+      #importFileInput
+      type="file"
+      accept=".txt,.json,text/plain,application/json"
+      hidden
+      (change)="onImportFileSelected($event)" />
+
+    @if (isHelpOpen) {
+      <aside class="help-panel" aria-label="Súgó menü">
+        <div class="help-panel__scroll">
+          <div class="help-panel__header">
+            <div>
+              <p class="help-panel__eyebrow">Gyors súgó</p>
+              <h3>Mit mivel lehet csinálni?</h3>
+            </div>
+            <button
+              type="button"
+              class="help-panel__close"
+              (click)="isHelpOpen = false"
+              aria-label="Súgó bezárása">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <p class="help-panel__intro">
+            A legfontosabb vezérlések egy helyen, hogy gyorsabban tudj tervezni.
+          </p>
+
+          <section class="help-section">
+            <h4><i class="bi bi-cursor-fill"></i> Elhelyezés és kijelölés</h4>
+            <div class="help-item">
+              <span class="help-item__action">Bútor / ajtó / ablak lerakása</span>
+              <span class="help-item__value">Bal egérgombbal fogd meg a bal oldali elemet, majd húzd a vászonra.</span>
+            </div>
+            <div class="help-item">
+              <span class="help-item__action">Elem kijelölése</span>
+              <span class="help-item__value">Bal kattintás egy elemre. <strong>Ctrl</strong> + bal kattintással több elemet is kijelölhetsz egyenként.</span>
+            </div>
+            <div class="help-item">
+              <span class="help-item__action">Mozgatás</span>
+              <span class="help-item__value">Bal egérgomb nyomva tartása mellett húzd az elemet a kívánt helyre.</span>
+            </div>
+          </section>
+
+          <section class="help-section">
+            <h4><i class="bi bi-bounding-box-circles"></i> Szerkesztés</h4>
+            <div class="help-item">
+              <span class="help-item__action">Átméretezés</span>
+              <span class="help-item__value">Kijelölés után használd a fogantyúkat vagy a Szélesség / Magasság mezőket.</span>
+            </div>
+            <div class="help-item">
+              <span class="help-item__action">Forgatás</span>
+              <span class="help-item__value">A jobb oldali Forgatás mezőben add meg a kívánt szöget.</span>
+            </div>
+            <div class="help-item">
+              <span class="help-item__action">Kijelölt bútor törlése</span>
+              <span class="help-item__value">Nyomd meg a <strong>Delete</strong> billentyűt vagy kattints a <strong>Törlés</strong> gombra.</span>
+            </div>
+            <div class="help-item">
+              <span class="help-item__action">Ajtó / ablak igazítása</span>
+              <span class="help-item__value">Falhoz tapadnak, a szélességet a mezővel vagy az oldalsó húzókkal állíthatod.</span>
+            </div>
+          </section>
+
+          <section class="help-section">
+            <h4><i class="bi bi-grid-1x2-fill"></i> Szoba és felületek</h4>
+            <div class="help-item">
+              <span class="help-item__action">Falak formázása</span>
+              <span class="help-item__value">Kattints a <strong>Falak formázása</strong> gombra, majd húzd a narancssárga pontokat.</span>
+            </div>
+            <div class="help-item">
+              <span class="help-item__action">Falak rögzítése</span>
+              <span class="help-item__value">Ugyanazzal a gombbal zárd le a falmozgatást, ha újra szeretnél bútorokat húzni.</span>
+            </div>
+            <div class="help-item">
+              <span class="help-item__action">Padló kiválasztása</span>
+              <span class="help-item__value">Kattints a bal oldali padlómintára, és azonnal lecseréljük a burkolatot.</span>
+            </div>
+            <div class="help-item">
+              <span class="help-item__action">Szőnyeg hozzáadása</span>
+              <span class="help-item__value">A szőnyegeket ugyanúgy drag and drop módszerrel tudod a szobába helyezni.</span>
+            </div>
+          </section>
+
+          <section class="help-section">
+            <h4><i class="bi bi-cloud-check-fill"></i> Mentés és export</h4>
+            <div class="help-item">
+              <span class="help-item__action">Mentés</span>
+              <span class="help-item__value">A <strong>Mentés</strong> gombbal elmented az aktuális szobatervet.</span>
+            </div>
+            <div class="help-item">
+              <span class="help-item__action">Importálás</span>
+              <span class="help-item__value">Az <strong>Importálás</strong> gombbal korábban mentett tervet tölthetsz vissza.</span>
+            </div>
+            <div class="help-item">
+              <span class="help-item__action">Mentett szobák</span>
+              <span class="help-item__value">A <strong>Mentett szobák</strong> menüben a saját szerverre mentett terveid külön listából tölthetők be.</span>
+            </div>
+            <div class="help-item">
+              <span class="help-item__action">PNG mentés</span>
+              <span class="help-item__value">A <strong>PNG mentés</strong> gomb képként exportálja a jelenlegi nézetet.</span>
+            </div>
+          </section>
+        </div>
+      </aside>
+    } @else {
+      <button
+        type="button"
+        class="help-peek"
+        (click)="isHelpOpen = true"
+        aria-label="Súgó megnyitása">
+        <i class="bi bi-chevron-left"></i>
+      </button>
+    }
+  </main>
+
+  @if (showSaveDialog) {
+    <div class="designer-dialog-backdrop" (click)="closeSaveDialog()">
+      <section class="designer-dialog" (click)="$event.stopPropagation()" aria-label="Mentési beállítások">
+        <div class="designer-dialog__header">
+          <div>
+            <p class="designer-dialog__eyebrow">Export</p>
+            <h3>Szoba mentése</h3>
+          </div>
+          <button type="button" class="designer-dialog__close" (click)="closeSaveDialog()" aria-label="Mentési ablak bezárása">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <label class="designer-field">
+          <span>Szoba neve</span>
+          <input type="text" [(ngModel)]="exportRoomName" placeholder="Például: Modern nappali" />
+        </label>
+
+        <label class="designer-check" [class.designer-check--disabled]="!canSaveToServer">
+          <input type="checkbox" [(ngModel)]="exportSaveToServer" [disabled]="!canSaveToServer" />
+          <span>Mentés felhasználói fiókba</span>
+        </label>
+
+        @if (!canSaveToServer) {
+          <p class="designer-dialog__hint designer-dialog__hint--warning">
+            Felhasználói fiókkal való bejelentkezés nélkül csak TXT export érhető el.
+          </p>
+        }
+
+        <label class="designer-check">
+          <input type="checkbox" [(ngModel)]="exportAlsoDownloadTxt" />
+          <span>TXT fájlt is töltsön le</span>
+        </label>
+
+        <p class="designer-dialog__hint">
+          Ha csak TXT-t választasz, a megadott név lesz a fájlnév. Ha szerverre is mentesz, ugyanez lesz a szoba neve.
+        </p>
+
+        <div class="designer-dialog__actions">
+          <button type="button" class="designer-btn designer-btn--ghost" (click)="closeSaveDialog()">Mégse</button>
+          <button type="button" class="designer-btn designer-btn--primary" (click)="confirmSaveRoom()" [disabled]="isSaving">
+            {{ isSaving ? 'Mentés folyamatban...' : 'Mentés' }}
+          </button>
+        </div>
+      </section>
+    </div>
+  }
+
+  @if (showImportDialog) {
+    <div class="designer-dialog-backdrop" (click)="closeImportDialog()">
+      <section class="designer-dialog" (click)="$event.stopPropagation()" aria-label="Importálási beállítások">
+        <div class="designer-dialog__header">
+          <div>
+            <p class="designer-dialog__eyebrow">Import</p>
+            <h3>Szoba betöltése</h3>
+          </div>
+          <button type="button" class="designer-dialog__close" (click)="closeImportDialog()" aria-label="Import ablak bezárása">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <label class="designer-field">
+          <span>Szoba neve</span>
+          <input type="text" [(ngModel)]="importRoomName" placeholder="Korábban mentett szoba neve" />
+        </label>
+
+        <div class="designer-dialog__separator">
+          <span>vagy</span>
+        </div>
+
+        <div class="designer-file">
+          <button type="button" class="designer-btn designer-btn--ghost" (click)="triggerImportFilePicker()">TXT fájl kiválasztása</button>
+          <div class="designer-file__meta">
+            <strong>{{ importFileName || 'Nincs kiválasztott fájl' }}</strong>
+            @if (importFileName) {
+              <button type="button" class="designer-file__clear" (click)="clearImportFile()">Törlés</button>
+            }
+          </div>
+        </div>
+
+        <p class="designer-dialog__hint">
+          Adj meg egy szobanevet, vagy válassz egy korábban exportált `.txt` fájlt. Ha mindkettő ki van töltve, a fájlból töltünk be.
+        </p>
+
+        <div class="designer-dialog__actions">
+          <button type="button" class="designer-btn designer-btn--ghost" (click)="closeImportDialog()">Mégse</button>
+          <button type="button" class="designer-btn designer-btn--primary" (click)="confirmImportRoom()" [disabled]="isImporting">
+            {{ isImporting ? 'Betöltés folyamatban...' : 'Betöltés' }}
+          </button>
+        </div>
+      </section>
+    </div>
+  }
+
+  @if (showSavedRoomsDialog) {
+    <div class="designer-dialog-backdrop" (click)="closeSavedRoomsDialog()">
+      <section class="designer-dialog designer-dialog--saved-rooms" (click)="$event.stopPropagation()" aria-label="Mentett szobák">
+        <div class="designer-dialog__header">
+          <div>
+            <p class="designer-dialog__eyebrow">Fiók mentések</p>
+            <h3>Mentett szobák</h3>
+            <p class="saved-room-summary">
+              @if (isLoadingSavedRooms) {
+                Mentések betöltése folyamatban...
+              } @else if (savedRooms.length === 1) {
+                1 mentett szoba található.
+              } @else {
+                {{ savedRooms.length }} mentett szoba található.
+              }
+            </p>
+          </div>
+          <button type="button" class="designer-dialog__close" (click)="closeSavedRoomsDialog()" aria-label="Mentett szobák ablak bezárása">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        @if (isLoadingSavedRooms) {
+          <div class="saved-room-state">
+            A saját mentett szobák listája most töltődik be.
+          </div>
+        } @else if (!savedRooms.length) {
+          <div class="saved-room-empty">
+            <strong>Még nincs mentett szobád.</strong>
+            <span>Ha a szerverre mentesz egy tervet, az itt külön sorban meg fog jelenni.</span>
+          </div>
+        } @else {
+          <div class="saved-room-list">
+            @for (room of savedRooms; track room.id) {
+              <article class="saved-room-card">
+                <div class="saved-room-card__content">
+                  <strong>{{ room.name || 'Névtelen szoba' }}</strong>
+                  <span>{{ formatSavedRoomDate(room.updated_at || room.created_at) }}</span>
+                </div>
+                <button
+                  type="button"
+                  class="designer-btn designer-btn--primary saved-room-card__button"
+                  (click)="loadSavedRoom(room)"
+                  [disabled]="loadingSavedRoomId !== null">
+                  {{ loadingSavedRoomId === room.id ? 'Betöltés...' : 'Betöltés' }}
+                </button>
+              </article>
+            }
+          </div>
+        }
+
+        <div class="designer-dialog__actions">
+          <button
+            type="button"
+            class="designer-btn designer-btn--ghost"
+            (click)="refreshSavedRooms()"
+            [disabled]="isLoadingSavedRooms || loadingSavedRoomId !== null">
+            Frissítés
+          </button>
+          <button
+            type="button"
+            class="designer-btn designer-btn--ghost"
+            (click)="closeSavedRoomsDialog()"
+            [disabled]="isLoadingSavedRooms || loadingSavedRoomId !== null">
+            Bezárás
+          </button>
+        </div>
+      </section>
+    </div>
+  }
+</div>
+

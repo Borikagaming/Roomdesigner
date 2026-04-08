@@ -1,0 +1,50 @@
+﻿<nav class="navbar">
+  <a class="brand-link" routerLink="/">
+    <span class="brand-icon">
+      <i class="bi bi-grid-1x2-fill"></i>
+    </span>
+    <span class="brand-copy">
+      <span class="brand-eyebrow">RoomDesigner</span>
+      <strong>Otthontervező stúdió</strong>
+    </span>
+  </a>
+
+  <div class="nav-cluster">
+    <a class="nav-action nav-action--ghost" routerLink="/">
+      <i class="bi bi-house-fill"></i>
+      <span>Kezdőoldal</span>
+    </a>
+
+    @if (isLoggedIn) {
+      <div class="user-profile-section">
+        <div class="profile-info" (click)="toggleDropdown()" role="button" aria-haspopup="true" [attr.aria-expanded]="showDropdown" tabindex="0">
+          <img [src]="currentUser?.profile_image || 'default-avatar.png'" class="nav-avatar" alt="avatar">
+          <span class="profile-copy">
+            <span class="profile-label">Bejelentkezve</span>
+            <span class="user-name">{{ currentUser?.name }}</span>
+          </span>
+          <span class="caret">
+            <i class="bi" [class.bi-chevron-up]="showDropdown" [class.bi-chevron-down]="!showDropdown"></i>
+          </span>
+        </div>
+
+        @if (showDropdown) {
+          <div class="profile-dropdown">
+            @if (isAdmin()) {
+              <button type="button" (click)="navigateTo('/admin')" class="dropdown-btn">
+                <i class="bi bi-shield-lock-fill"></i> Admin felület
+              </button>
+            }
+            <button type="button" (click)="navigateTo('/settings')" class="dropdown-btn"><i class="bi bi-gear-fill"></i> Beállítások</button>
+            <button type="button" (click)="logout()" class="dropdown-btn logout-btn"><i class="bi bi-box-arrow-right"></i> Kijelentkezés</button>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="nav-actions">
+        <a class="nav-action nav-action--ghost" routerLink="/login">Bejelentkezés</a>
+        <a class="nav-action nav-action--primary" routerLink="/register">Regisztráció</a>
+      </div>
+    }
+  </div>
+</nav>
